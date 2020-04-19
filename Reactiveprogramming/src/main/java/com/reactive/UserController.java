@@ -5,6 +5,7 @@ import java.time.Duration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import lombok.extern.java.Log;
 import reactor.core.publisher.BaseSubscriber;
@@ -15,6 +16,7 @@ import reactor.core.publisher.Flux;
 @Log
 public class UserController {
 
+	private WebClient client = WebClient.create("http://localhost:9191");
 	@RequestMapping("/get")
 	public void getVal() {
 		
@@ -57,6 +59,31 @@ public void hotReactor() throws InterruptedException {
 	Thread.sleep(2000);
 	cf.subscribe(s -> System.out.println("Second Subscription - "+s));
 }
+
+@RequestMapping("/webclient1")
+public Flux<String> webClientCallRetive(){
+	return client.get().uri("/rs/all")
+	.retrieve()
+	.bodyToFlux(String.class)
+	.log();
+	
+	
+}
+@RequestMapping("/webclient2")
+public Flux<String> webClientCallExchange(){
+	return client.get().uri("/rs/all")
+	.exchange()
+	.flatMapMany(res ->  res.bodyToFlux(String.class))
+	.log();
+	
+	
+}
+
+
+
+
+
+
 }
 
 
